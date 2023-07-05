@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <div class="box" id="heading">
+        <h1> <%= today%></h1>
+    </div>
+ 
+
+    <div class="box">
+        <%  for (let i = 0; i < newitem.length; i++) {%>
+            <form action="/delete" method="post">
+                <div class="item">
+                    <input type="checkbox" name="checkbox" value="<%= newitem[i]._id %>" onChange="this.form.submit()">
+                    <p style="  overflow: hidden;
+                    text-overflow: ellipsis;
+                    word-wrap: break-word;" ><%=newitem[i].name%></p>
+                </div>
+
+            </form>
+           
+       <%}%>
+
+       <form class="item" action="/" method="post">
+        <input type="text" name="add" id="" placeholder="New to do" autocomplete="off">
+        <button type="submit" >+</button>
+         </form>
+    </div>
+
+    
+</body>
+</html>
