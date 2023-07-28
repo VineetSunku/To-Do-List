@@ -1,13 +1,35 @@
 const express= require ("express");
 const bodyParser= require ("body-parser")
 const app= express();
-const mongoose=require("mongoose");
+//const mongoose=require("mongoose");
+const mysql = require('mysql');
 
 app.use(bodyParser.urlencoded({extended:true}));
 app.set('view engine','ejs');
 app.use(express.static("public"));
 
-mongoose.connect("mongodb://127.0.0.1:27017/todolistDB");
+//mongoose.connect("mongodb://127.0.0.1:27017/todolistDB");
+
+var mysqlconnection = mysql.createConnection({
+    host:'localhost',
+    user:'system',
+    password:'system',
+    database:'test',
+    multipleStatements : true
+    
+    });
+    
+    mysqlconnection.connect((err)=>{
+    
+    if(!err)
+    {
+        console.log("sonnection successful");
+    }
+    else
+    console.log(err);
+    
+    })
+    
 const itemschema= 
 {
     name:String
@@ -29,14 +51,27 @@ app.get("/",(req,res)=>{
     }
     var date=today.toLocaleDateString("en-US", options);
 
-   item.find({}).then((add)=>{
+//    item.find({}).then((add)=>{
   
-       res.render("list",{today:date,newitem:add});
+//        res.render("list",{today:date,newitem:add});
    
-   }).catch((err)=>{
-    console.log(err);
-   });
-         
+//    }).catch((err)=>{
+//     console.log(err);
+//    });
+   mysqlconnection.query('select * from item',(err,rows,fields)=>{
+	
+	if(!err)
+	{
+		//console.log(rows[0].item); //item - column name
+		res.render("list",{today:date,newitem:rows});
+		//res.send(rows); //displays json data on browser
+	}
+	else{
+	console.log(err);
+	}
+
+})
+   
 
    
 });
@@ -74,13 +109,26 @@ app.get("/:customListName",(req,res)=>{
 app.post("/delete", (req,res)=>{
     const itemID=req.body.checkbox;
   
-   item.findByIdAndRemove(itemID)
-   .then(function () {
-       console.log("Successfully removed");
-   })
-   .catch(function (err) {
-       console.log(err);
-   });
+//    item.findByIdAndRemove(itemID)
+//    .then(function () {
+//        console.log("Successfully removed");
+//    })
+//    .catch(function (err) {
+//        console.log(err);
+//    });
+   mysqlconnection.query('delete from item where _id = ?',[itemID],(err,rows,fields)=>{
+	
+	if(!err)
+	{
+		console.log("deleted"); 
+		
+	}
+	else{
+	console.log(err);
+	}
+
+})
+
     res.redirect("/");
 })
 
@@ -89,11 +137,26 @@ app.post("/",(req,res)=>{
     const item1= new item({
         name:req.body.add
         }) ;
-   item.insertMany([item1]);
-   res.redirect("/");
+ //  item.insertMany([item1]);
+ //var sql = 'set @item = ?; Insert into item values(@item)' 
+
+mysqlconnection.query('Insert into item SET?',item1,(err,rows,fields)=>{
+	
+	if(!err)
+	{
+		console.log("inserted"); 
+		//res.send(rows);
+		res.redirect("/");
+	}
+	else{
+	console.log(err);
+	}
+
+})
+   
 })
 
 
 app.listen(3000,()=>{
-    console.log("i am liening");
+    console.log("i am listening");
 })
